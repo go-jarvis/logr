@@ -12,6 +12,9 @@ type Logger interface {
 
 	With(args ...any) Logger
 
+	Start() Logger
+	Stop()
+
 	Enabled(level slog.Level) bool
 	SetLevel(level slog.Level) Logger
 }

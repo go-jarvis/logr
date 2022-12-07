@@ -2,6 +2,7 @@ package logr
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/go-jarvis/logr/slogx"
 	"golang.org/x/exp/slog"
@@ -13,7 +14,9 @@ type logger struct {
 	slog  *slog.Logger
 	level slog.Level
 
-	args []any
+	kvs []any
+
+	timer time.Time
 }
 
 func Default() *logger {
@@ -47,17 +50,31 @@ func (log *logger) Error(err error) {
 	}
 }
 
-func (log *logger) With(args ...any) Logger {
-	if len(args)%2 != 0 {
-		args = append(args, "Unknown_LACK")
+func (log *logger) With(kvs ...any) Logger {
+	if len(kvs)%2 != 0 {
+		kvs = append(kvs, "Unknown_LACK")
 	}
-	if log.args == nil {
-		log.args = make([]any, 0)
+	if log.kvs == nil {
+		log.kvs = make([]any, 0)
 	}
 
-	log.args = append(log.args, args...)
+	logc := log.copy()
+	logc.slog = log.slog.With(kvs...)
+	return logc
+}
 
-	return log
+func (log *logger) Start() Logger {
+	logc := log.copy()
+	logc.timer = time.Now()
+
+	return logc
+}
+
+func (log *logger) Stop() {
+	cost := time.Now().Sub(log.timer).Milliseconds() / 1e3
+
+	log.With("cost", cost).Info("time-cost")
+
 }
 
 // Enabled return log level result
@@ -70,5 +87,13 @@ func (log *logger) SetLevel(level slog.Level) Logger {
 	return &logger{
 		slog:  log.slog,
 		level: level,
+	}
+}
+
+func (log *logger) copy() *logger {
+	return &logger{
+		slog:  log.slog,
+		level: log.level,
+		kvs:   log.kvs,
 	}
 }
