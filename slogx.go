@@ -1,0 +1,57 @@
+package logr
+
+import (
+	"fmt"
+
+	"github.com/go-jarvis/logr/slogx"
+	"golang.org/x/exp/slog"
+)
+
+var _ Logger = &logger{}
+
+type logger struct {
+	slog  *slog.Logger
+	level slog.Level
+}
+
+func Default() *logger {
+	return &logger{
+		slog:  slogx.Default(),
+		level: slog.InfoLevel,
+	}
+}
+
+func (log *logger) SetLevel(level slog.Level) Logger {
+	return &logger{
+		slog:  log.slog,
+		level: level,
+	}
+}
+
+func (log *logger) Enabled(level slog.Level) bool {
+	return log.level <= level
+}
+
+func (log *logger) Debug(msg string, args ...any) {
+	if log.Enabled(slog.DebugLevel) {
+		log.slog.LogDepth(0, slog.DebugLevel, fmt.Sprintf(msg, args...))
+	}
+}
+
+func (log *logger) Info(msg string, args ...any) {
+	if log.Enabled(slog.InfoLevel) {
+		log.slog.LogDepth(0, slog.InfoLevel, fmt.Sprintf(msg, args...))
+	}
+}
+
+func (log *logger) Warn(err error) {
+	if log.Enabled(slog.WarnLevel) {
+		log.slog.LogDepth(0, slog.WarnLevel, err.Error())
+	}
+}
+
+func (log *logger) Error(err error) {
+	if log.Enabled(slog.ErrorLevel) {
+		log.slog.LogDepth(0, slog.ErrorLevel, err.Error())
+	}
+}
