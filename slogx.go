@@ -21,17 +21,6 @@ func Default() *logger {
 	}
 }
 
-func (log *logger) SetLevel(level slog.Level) Logger {
-	return &logger{
-		slog:  log.slog,
-		level: level,
-	}
-}
-
-func (log *logger) Enabled(level slog.Level) bool {
-	return log.level <= level
-}
-
 func (log *logger) Debug(msg string, args ...any) {
 	if log.Enabled(slog.DebugLevel) {
 		log.slog.LogDepth(0, slog.DebugLevel, fmt.Sprintf(msg, args...))
@@ -53,5 +42,18 @@ func (log *logger) Warn(err error) {
 func (log *logger) Error(err error) {
 	if log.Enabled(slog.ErrorLevel) {
 		log.slog.LogDepth(0, slog.ErrorLevel, err.Error())
+	}
+}
+
+// Enabled return log level result
+func (log *logger) Enabled(level slog.Level) bool {
+	return log.level <= level
+}
+
+// SetLevel set level
+func (log *logger) SetLevel(level slog.Level) Logger {
+	return &logger{
+		slog:  log.slog,
+		level: level,
 	}
 }
