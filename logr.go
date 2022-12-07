@@ -10,6 +10,8 @@ type Logger interface {
 	Warn(err error)
 	Error(err error)
 
+	With(args ...any) Logger
+
 	Enabled(level slog.Level) bool
 	SetLevel(level slog.Level) Logger
 }

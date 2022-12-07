@@ -12,6 +12,8 @@ var _ Logger = &logger{}
 type logger struct {
 	slog  *slog.Logger
 	level slog.Level
+
+	args []any
 }
 
 func Default() *logger {
@@ -43,6 +45,19 @@ func (log *logger) Error(err error) {
 	if log.Enabled(slog.ErrorLevel) {
 		log.slog.LogDepth(0, slog.ErrorLevel, err.Error())
 	}
+}
+
+func (log *logger) With(args ...any) Logger {
+	if len(args)%2 != 0 {
+		args = append(args, "Unknown_LACK")
+	}
+	if log.args == nil {
+		log.args = make([]any, 0)
+	}
+
+	log.args = append(log.args, args...)
+
+	return log
 }
 
 // Enabled return log level result
