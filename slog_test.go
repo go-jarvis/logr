@@ -8,10 +8,22 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+func timeStamp() Vauler {
+	return func() any {
+		return time.Now().Format(time.RFC3339)
+	}
+}
+
+func timeStamp2() any {
+	return time.Now().Format(time.RFC3339)
+}
+
 func TestDefault(t *testing.T) {
 
 	log := Default().SetLevel(slog.DebugLevel)
 	err := errors.New("New_ERROR")
+
+	log = log.With("timestamp", timeStamp(), "kk", "vv", "ts", timeStamp2)
 
 	log.Debug("number=%d", 1)
 	log.Info("number=%d", 1)

@@ -14,7 +14,8 @@ type logger struct {
 	slog  *slog.Logger
 	level slog.Level
 
-	kvs []any
+	hasValuer bool
+	kvs       []any
 
 	timer time.Time
 }
@@ -26,27 +27,38 @@ func Default() *logger {
 	}
 }
 
+// Log 绑定参数，打印日志
+func (log *logger) Log(level slog.Level, msg string) {
+	kvs := append([]any{}, log.kvs...)
+
+	if log.hasValuer {
+		kvs = bindValuer(kvs...)
+	}
+
+	log.slog.With(kvs...).LogDepth(0, level, msg)
+}
+
 func (log *logger) Debug(msg string, args ...any) {
 	if log.Enabled(slog.DebugLevel) {
-		log.slog.LogDepth(0, slog.DebugLevel, fmt.Sprintf(msg, args...))
+		log.Log(slog.DebugLevel, fmt.Sprintf(msg, args...))
 	}
 }
 
 func (log *logger) Info(msg string, args ...any) {
 	if log.Enabled(slog.InfoLevel) {
-		log.slog.LogDepth(0, slog.InfoLevel, fmt.Sprintf(msg, args...))
+		log.Log(slog.InfoLevel, fmt.Sprintf(msg, args...))
 	}
 }
 
 func (log *logger) Warn(err error) {
 	if log.Enabled(slog.WarnLevel) {
-		log.slog.LogDepth(0, slog.WarnLevel, err.Error())
+		log.Log(slog.WarnLevel, err.Error())
 	}
 }
 
 func (log *logger) Error(err error) {
 	if log.Enabled(slog.ErrorLevel) {
-		log.slog.LogDepth(0, slog.ErrorLevel, err.Error())
+		log.Log(slog.ErrorLevel, err.Error())
 	}
 }
 
@@ -59,7 +71,11 @@ func (log *logger) With(kvs ...any) Logger {
 	}
 
 	logc := log.copy()
-	logc.slog = log.slog.With(kvs...)
+	if !logc.hasValuer && hasVauler(kvs...) {
+		logc.hasValuer = true
+	}
+	logc.kvs = append(logc.kvs, kvs...)
+
 	return logc
 }
 
@@ -74,7 +90,6 @@ func (log *logger) Stop() {
 	cost := time.Now().Sub(log.timer).Milliseconds() / 1e3
 
 	log.With("cost", cost).Info("time-cost")
-
 }
 
 // Enabled return log level result
@@ -92,8 +107,9 @@ func (log *logger) SetLevel(level slog.Level) Logger {
 
 func (log *logger) copy() *logger {
 	return &logger{
-		slog:  log.slog,
-		level: log.level,
-		kvs:   log.kvs,
+		slog:      log.slog,
+		level:     log.level,
+		hasValuer: log.hasValuer,
+		kvs:       log.kvs,
 	}
 }
