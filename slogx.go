@@ -71,7 +71,7 @@ func (log *logger) With(kvs ...any) Logger {
 	}
 
 	logc := log.copy()
-	if !logc.hasValuer && hasVauler(kvs...) {
+	if !logc.hasValuer && hasValuer(kvs...) {
 		logc.hasValuer = true
 	}
 	logc.kvs = append(logc.kvs, kvs...)

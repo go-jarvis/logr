@@ -2,7 +2,7 @@ package logr
 
 type Valuer = func() any
 
-func hasVauler(kvs ...any) bool {
+func hasValuer(kvs ...any) bool {
 	for _, kv := range kvs {
 		if _, ok := kv.(Valuer); ok {
 			return true
