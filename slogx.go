@@ -67,13 +67,14 @@ func (log *logger) With(kvs ...any) Logger {
 	if len(kvs)%2 != 0 {
 		kvs = append(kvs, "LACK_Unknown")
 	}
-	if log.kvs == nil {
-		log.kvs = make([]any, 0)
-	}
 
 	logc := log.copy()
 	if !logc.hasValuer && hasValuer(kvs...) {
 		logc.hasValuer = true
+	}
+
+	if log.kvs == nil {
+		log.kvs = make([]any, 0)
 	}
 
 	logc.kvs = append(logc.kvs, kvs...)
