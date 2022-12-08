@@ -89,7 +89,7 @@ func (log *logger) Start() Logger {
 func (log *logger) Stop() {
 	cost := time.Now().Sub(log.timer).Milliseconds() / 1e3
 
-	log.With("cost", cost).Info("time-cost")
+	log.With("cost", cost, "func", CallerFunc(5)).Info("time-cost")
 }
 
 // Enabled return log level result
