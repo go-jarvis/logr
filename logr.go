@@ -14,6 +14,9 @@ type Logger interface {
 
 	With(args ...any) Logger
 
+	// 启动计时器
+	// log = log.Start()
+	// defer log.Stop()
 	Start() Logger
 	Stop()
 
