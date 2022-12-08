@@ -117,7 +117,7 @@ func (log *levelLogger) Stop() {
 
 	log.With(
 		"cost", fmt.Sprintf("%dms", cost),
-		"caller", CallerFile(5, false),
+		"cost_caller", CallerFile(5, false),
 	).Info("time-cost")
 }
 
