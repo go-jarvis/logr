@@ -3,7 +3,7 @@ hooks:
   pre-commit:
     - golangci-lint run
     - husky lint-staged
-   commit-msg:
+  commit-msg:
      - husky lint-commit
 
 lint-staged:
