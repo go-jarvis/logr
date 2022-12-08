@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 type Valuer = func() any
@@ -28,19 +29,14 @@ func bindValuer(kvs ...any) []any {
 
 func CallerFile(dep int, abspath bool) Valuer {
 	return func() any {
-		_, file, line, _ := runtime.Caller(dep)
-
+		pc, file, line, _ := runtime.Caller(dep)
+		funcName := runtime.FuncForPC(pc).Name()
 		if !abspath {
 			file = filepath.Base(file)
-		}
-		return fmt.Sprintf("%s:%d", file, line)
-	}
-}
 
-func CallerFunc(dep int) Valuer {
-	return func() any {
-		pc, _, _, _ := runtime.Caller(dep)
-		funcName := runtime.FuncForPC(pc).Name()
-		return funcName
+			parts := strings.Split(funcName, ".")
+			funcName = parts[len(parts)-1]
+		}
+		return fmt.Sprintf("%s:%d#%s", file, line, funcName)
 	}
 }

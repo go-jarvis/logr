@@ -24,9 +24,11 @@ func TestDefault(t *testing.T) {
 	log := Default().SetLevel(slog.DebugLevel)
 	err := errors.New("New_ERROR")
 
-	//log = log.With("timestamp", timeStamp(), "kk", "vv", "ts", timeStamp2)
-
-	log = log.With("caller", CallerFile(4, true))
+	log = log.With(
+		"kk", "vv",
+		"caller", CallerFile(4, false),
+		"gg",
+	)
 
 	log.Debug("number=%d", 1)
 	log.Info("number=%d", 1)
@@ -36,7 +38,7 @@ func TestDefault(t *testing.T) {
 	log = log.Start()
 	defer log.Stop()
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(532 * time.Millisecond)
 
 	ctx := WithContext(context.Background(), log)
 	subcaller(ctx)
