@@ -23,7 +23,7 @@ type levelLogger struct {
 
 func Default() Logger {
 	return &levelLogger{
-		slog:  slogx.Default(),
+		slog:  slogx.DefaultLogger(),
 		level: slog.InfoLevel,
 	}
 }

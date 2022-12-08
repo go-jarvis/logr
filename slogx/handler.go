@@ -8,7 +8,7 @@ type slogDefaultHandler struct {
 	handler slog.Handler
 }
 
-func defaultHandler() slog.Handler {
+func DefaultHandler() slog.Handler {
 	return newDefaultHandler(slog.Default().Handler())
 }
 
