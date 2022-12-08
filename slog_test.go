@@ -10,7 +10,7 @@ import (
 )
 
 func timeStamp() Valuer {
-	return func() any {
+	return func(context.Context) any {
 		return time.Now().Format(time.RFC3339)
 	}
 }
@@ -40,7 +40,7 @@ func TestDefault(t *testing.T) {
 
 	time.Sleep(532 * time.Millisecond)
 
-	ctx := WithContext(context.Background(), log)
+	ctx := WithLogger(context.Background(), log)
 	subcaller(ctx)
 }
 

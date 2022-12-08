@@ -1,13 +1,14 @@
 package logr
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"runtime"
 	"strings"
 )
 
-type Valuer = func() any
+type Valuer = func(context.Context) any
 
 func hasValuer(kvs ...any) bool {
 	for _, kv := range kvs {
@@ -18,17 +19,17 @@ func hasValuer(kvs ...any) bool {
 	return false
 }
 
-func bindValuer(kvs ...any) []any {
+func bindValuer(ctx context.Context, kvs ...any) []any {
 	for idx, kv := range kvs {
 		if valuer, ok := kv.(Valuer); ok {
-			kvs[idx] = valuer()
+			kvs[idx] = valuer(ctx)
 		}
 	}
 	return kvs
 }
 
 func CallerFile(dep int, abspath bool) Valuer {
-	return func() any {
+	return func(ctx context.Context) any {
 		pc, file, line, _ := runtime.Caller(dep)
 		funcName := runtime.FuncForPC(pc).Name()
 		if !abspath {

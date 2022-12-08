@@ -2,6 +2,7 @@ package logr
 
 import (
 	"context"
+
 	"golang.org/x/exp/slog"
 )
 
@@ -18,13 +19,16 @@ type Logger interface {
 
 	Enabled(level slog.Level) bool
 	SetLevel(level slog.Level) Logger
+
+	WithContext(context.Context) Logger
+	Context() context.Context
 }
 
 type LogrKey int
 
 const defaultLogrKey LogrKey = 0
 
-func WithContext(ctx context.Context, log Logger) context.Context {
+func WithLogger(ctx context.Context, log Logger) context.Context {
 	return context.WithValue(ctx, defaultLogrKey, log)
 }
 

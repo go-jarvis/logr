@@ -1,6 +1,7 @@
 package logr
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -32,7 +33,7 @@ func (log *logger) Log(level slog.Level, msg string) {
 	kvs := append([]any{}, log.kvs...)
 
 	if log.hasValuer {
-		kvs = bindValuer(kvs...)
+		kvs = bindValuer(log.slog.Context(), kvs...)
 	}
 
 	log.slog.With(kvs...).LogDepth(0, level, msg)
@@ -64,7 +65,7 @@ func (log *logger) Error(err error) {
 
 func (log *logger) With(kvs ...any) Logger {
 	if len(kvs)%2 != 0 {
-		kvs = append(kvs, "Unknown_LACK")
+		kvs = append(kvs, "LACK_Unknown")
 	}
 	if log.kvs == nil {
 		log.kvs = make([]any, 0)
@@ -74,6 +75,7 @@ func (log *logger) With(kvs ...any) Logger {
 	if !logc.hasValuer && hasValuer(kvs...) {
 		logc.hasValuer = true
 	}
+
 	logc.kvs = append(logc.kvs, kvs...)
 
 	return logc
@@ -106,6 +108,16 @@ func (log *logger) SetLevel(level slog.Level) Logger {
 		slog:  log.slog,
 		level: level,
 	}
+}
+
+func (log *logger) WithContext(ctx context.Context) Logger {
+	logc := log.copy()
+	logc.slog = log.slog.WithContext(ctx)
+	return logc
+}
+
+func (log *logger) Context() context.Context {
+	return log.slog.Context()
 }
 
 func (log *logger) copy() *logger {
