@@ -1,6 +1,7 @@
 package logr
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -25,7 +26,7 @@ func TestDefault(t *testing.T) {
 
 	//log = log.With("timestamp", timeStamp(), "kk", "vv", "ts", timeStamp2)
 
-	log = log.With("caller", CallerFile(4, false))
+	log = log.With("caller", CallerFile(4, true))
 
 	log.Debug("number=%d", 1)
 	log.Info("number=%d", 1)
@@ -36,4 +37,12 @@ func TestDefault(t *testing.T) {
 	defer log.Stop()
 
 	time.Sleep(2 * time.Second)
+
+	ctx := WithContext(context.Background(), log)
+	subcaller(ctx)
+}
+
+func subcaller(ctx context.Context) {
+	log := FromContext(ctx)
+	log.Info("account=%d", 100)
 }
