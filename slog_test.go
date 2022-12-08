@@ -8,7 +8,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func timeStamp() Vauler {
+func timeStamp() Valuer {
 	return func() any {
 		return time.Now().Format(time.RFC3339)
 	}
