@@ -28,18 +28,6 @@ func Default() Logger {
 	}
 }
 
-type Config struct {
-	level  Level
-	logger *slog.Logger
-}
-
-func New(c Config) Logger {
-	return &levelLogger{
-		level: c.level,
-		slog:  c.logger,
-	}
-}
-
 // Log 绑定参数，打印日志
 func (log *levelLogger) Log(level slog.Level, msg string) {
 	kvs := append([]any{}, log.kvs...)

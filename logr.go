@@ -2,6 +2,9 @@ package logr
 
 import (
 	"context"
+
+	"github.com/go-jarvis/logr/slogx"
+	"golang.org/x/exp/slog"
 )
 
 type Logger interface {
@@ -40,4 +43,23 @@ func FromContext(ctx context.Context) Logger {
 	}
 
 	return Default()
+}
+
+type Config struct {
+	level  string
+	logger *slog.Logger
+}
+
+func New(c Config) Logger {
+	if c.logger == nil {
+		c.logger = slogx.DefaultLogger()
+	}
+	if c.level == "" {
+		c.level = "info"
+	}
+
+	return &levelLogger{
+		level: LevelFromText(c.level),
+		slog:  c.logger,
+	}
 }
