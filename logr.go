@@ -46,20 +46,20 @@ func FromContext(ctx context.Context) Logger {
 }
 
 type Config struct {
-	level  string
-	logger *slog.Logger
+	Level   string
+	Slogger *slog.Logger
 }
 
 func New(c Config) Logger {
-	if c.logger == nil {
-		c.logger = slogx.DefaultLogger()
+	if c.Slogger == nil {
+		c.Slogger = slogx.DefaultLogger()
 	}
-	if c.level == "" {
-		c.level = "info"
+	if c.Level == "" {
+		c.Level = "info"
 	}
 
 	return &levelLogger{
-		level: LevelFromText(c.level),
-		slog:  c.logger,
+		level: LevelFromText(c.Level),
+		slog:  c.Slogger,
 	}
 }
