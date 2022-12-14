@@ -13,7 +13,7 @@ var _ Logger = &levelLogger{}
 
 type levelLogger struct {
 	slog  *slog.Logger
-	level slog.Level
+	level Level
 
 	hasValuer bool
 	kvs       []any
@@ -24,12 +24,12 @@ type levelLogger struct {
 func Default() Logger {
 	return &levelLogger{
 		slog:  slogx.DefaultLogger(),
-		level: slog.InfoLevel,
+		level: InfoLevel,
 	}
 }
 
 type Config struct {
-	level  slog.Level
+	level  Level
 	logger *slog.Logger
 }
 
@@ -53,28 +53,28 @@ func (log *levelLogger) Log(level slog.Level, msg string) {
 
 // Debug 打印 debug 日志
 func (log *levelLogger) Debug(msg string, args ...any) {
-	if log.Enabled(slog.DebugLevel) {
+	if log.Enabled(DebugLevel) {
 		log.Log(slog.DebugLevel, fmt.Sprintf(msg, args...))
 	}
 }
 
 // Info 打印 info 日志
 func (log *levelLogger) Info(msg string, args ...any) {
-	if log.Enabled(slog.InfoLevel) {
+	if log.Enabled(InfoLevel) {
 		log.Log(slog.InfoLevel, fmt.Sprintf(msg, args...))
 	}
 }
 
 // Warn 打印 Warn 日志
 func (log *levelLogger) Warn(err error) {
-	if log.Enabled(slog.WarnLevel) {
+	if log.Enabled(WarnLevel) {
 		log.Log(slog.WarnLevel, err.Error())
 	}
 }
 
 // Error 打印 Error 日志
 func (log *levelLogger) Error(err error) {
-	if log.Enabled(slog.ErrorLevel) {
+	if log.Enabled(ErrorLevel) {
 		log.Log(slog.ErrorLevel, err.Error())
 	}
 }
@@ -122,12 +122,12 @@ func (log *levelLogger) Stop() {
 }
 
 // Enabled 比较是否符合打印日志级别
-func (log *levelLogger) Enabled(level slog.Level) bool {
+func (log *levelLogger) Enabled(level Level) bool {
 	return log.level <= level
 }
 
 // SetLevel 设置日志等级， 并返回一个新的 Logger 对象
-func (log *levelLogger) SetLevel(level slog.Level) Logger {
+func (log *levelLogger) SetLevel(level Level) Logger {
 	return &levelLogger{
 		slog:  log.slog,
 		level: level,

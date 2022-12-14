@@ -5,8 +5,6 @@ import (
 	"errors"
 	"testing"
 	"time"
-
-	"golang.org/x/exp/slog"
 )
 
 func timeStamp() Valuer {
@@ -21,7 +19,7 @@ func timeStamp2() any {
 
 func TestDefault(t *testing.T) {
 
-	log := Default().SetLevel(slog.DebugLevel)
+	log := Default().SetLevel(DebugLevel)
 	err := errors.New("New_ERROR")
 
 	log = log.With(

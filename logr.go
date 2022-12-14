@@ -2,8 +2,6 @@ package logr
 
 import (
 	"context"
-
-	"golang.org/x/exp/slog"
 )
 
 type Logger interface {
@@ -20,8 +18,8 @@ type Logger interface {
 	Start() Logger
 	Stop()
 
-	Enabled(level slog.Level) bool
-	SetLevel(level slog.Level) Logger
+	Enabled(level Level) bool
+	SetLevel(level Level) Logger
 
 	WithContext(context.Context) Logger
 	Context() context.Context
