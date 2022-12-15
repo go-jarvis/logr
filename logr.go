@@ -2,64 +2,136 @@ package logr
 
 import (
 	"context"
+	"fmt"
+	"time"
 
-	"github.com/go-jarvis/logr/slogx"
 	"golang.org/x/exp/slog"
 )
 
-type Logger interface {
-	Debug(msg string, args ...any)
-	Info(msg string, args ...any)
-	Warn(err error)
-	Error(err error)
+var _ Logger = &levelLogger{}
 
-	With(args ...any) Logger
+type levelLogger struct {
+	slog  *slog.Logger
+	level Level
 
-	// 启动计时器
-	// log = log.Start()
-	// defer log.Stop()
-	Start() Logger
-	Stop()
+	hasValuer bool
+	kvs       []any
 
-	Enabled(level Level) bool
-	SetLevel(level Level) Logger
-
-	WithContext(context.Context) Logger
-	Context() context.Context
+	timer time.Time
 }
 
-type LogrKey int
+// Log 绑定参数，打印日志
+func (log *levelLogger) Log(level slog.Level, msg string) {
+	kvs := append([]any{}, log.kvs...)
 
-const defaultLogrKey LogrKey = 0
-
-func WithLogger(ctx context.Context, log Logger) context.Context {
-	return context.WithValue(ctx, defaultLogrKey, log)
-}
-
-func FromContext(ctx context.Context) Logger {
-	val := ctx.Value(defaultLogrKey)
-	if log, ok := val.(Logger); ok {
-		return log
+	if log.hasValuer {
+		kvs = bindValuer(log.slog.Context(), kvs...)
 	}
 
-	return Default()
+	log.slog.With(kvs...).LogDepth(0, level, msg)
 }
 
-type Config struct {
-	Level   string
-	Slogger *slog.Logger
+// Debug 打印 debug 日志
+func (log *levelLogger) Debug(msg string, args ...any) {
+	if log.Enabled(DebugLevel) {
+		log.Log(slog.DebugLevel, fmt.Sprintf(msg, args...))
+	}
 }
 
-func New(c Config) Logger {
-	if c.Slogger == nil {
-		c.Slogger = slogx.DefaultLogger()
+// Info 打印 info 日志
+func (log *levelLogger) Info(msg string, args ...any) {
+	if log.Enabled(InfoLevel) {
+		log.Log(slog.InfoLevel, fmt.Sprintf(msg, args...))
 	}
-	if c.Level == "" {
-		c.Level = "info"
+}
+
+// Warn 打印 Warn 日志
+func (log *levelLogger) Warn(err error) {
+	if log.Enabled(WarnLevel) {
+		log.Log(slog.WarnLevel, err.Error())
+	}
+}
+
+// Error 打印 Error 日志
+func (log *levelLogger) Error(err error) {
+	if log.Enabled(ErrorLevel) {
+		log.Log(slog.ErrorLevel, err.Error())
+	}
+}
+
+// With 添加 k=v 数据， 如果参数格式为奇数， 则在最后补充 `LACK_Unknown`
+// 并返回一个新的 Logger 对象
+func (log *levelLogger) With(kvs ...any) Logger {
+	if len(kvs)%2 != 0 {
+		kvs = append(kvs, "LACK_Unknown")
 	}
 
+	logc := log.copy()
+	if !logc.hasValuer && hasValuer(kvs...) {
+		logc.hasValuer = true
+	}
+
+	if log.kvs == nil {
+		log.kvs = make([]any, 0)
+	}
+
+	logc.kvs = append(logc.kvs, kvs...)
+
+	return logc
+}
+
+// Start 启动 logger 对象计时器， 计算函数使用耗时（毫秒）， 并返回一个新的 Logger 对象
+//
+//	log = log.Start()
+//	defer log.Stop()
+func (log *levelLogger) Start() Logger {
+	logc := log.copy()
+	logc.timer = time.Now()
+
+	return logc
+}
+
+// Stop 停止计时， 并使用 Info 级别打印耗时（毫秒） 与 调用函数
+func (log *levelLogger) Stop() {
+	cost := time.Now().Sub(log.timer).Milliseconds()
+
+	log.With(
+		"cost", fmt.Sprintf("%dms", cost),
+		"cost_caller", CallerFile(5, false),
+	).Info("time-cost")
+}
+
+// Enabled 比较是否符合打印日志级别
+func (log *levelLogger) Enabled(level Level) bool {
+	return log.level <= level
+}
+
+// SetLevel 设置日志等级， 并返回一个新的 Logger 对象
+func (log *levelLogger) SetLevel(level Level) Logger {
 	return &levelLogger{
-		level: LevelFromText(c.Level),
-		slog:  c.Slogger,
+		slog:  log.slog,
+		level: level,
+	}
+}
+
+// WithContext 将 context 保存到 Logger 中
+func (log *levelLogger) WithContext(ctx context.Context) Logger {
+	logc := log.copy()
+	logc.slog = log.slog.WithContext(ctx)
+	return logc
+}
+
+// Context 从 Logger 中提取 context
+func (log *levelLogger) Context() context.Context {
+	return log.slog.Context()
+}
+
+// copy 复制一个新的 *levelLogger 对象
+func (log *levelLogger) copy() *levelLogger {
+	return &levelLogger{
+		slog:      log.slog,
+		level:     log.level,
+		hasValuer: log.hasValuer,
+		kvs:       log.kvs,
 	}
 }
