@@ -7,16 +7,6 @@ import (
 	"time"
 )
 
-func timeStamp() Valuer {
-	return func(context.Context) any {
-		return time.Now().Format(time.RFC3339)
-	}
-}
-
-func timeStamp2() any {
-	return time.Now().Format(time.RFC3339)
-}
-
 func TestDefault(t *testing.T) {
 
 	log := Default().SetLevel(DebugLevel)
@@ -33,16 +23,16 @@ func TestDefault(t *testing.T) {
 	log.Warn(err)
 	log.Error(err)
 
-	log = log.Start()
-	defer log.Stop()
-
-	time.Sleep(532 * time.Millisecond)
-
 	ctx := WithLogger(context.Background(), log)
 	subcaller(ctx)
 }
 
 func subcaller(ctx context.Context) {
 	log := FromContext(ctx)
+
+	log = log.Start() // time cost
+	defer log.Stop()
+
+	time.Sleep(532 * time.Millisecond)
 	log.Info("account=%d", 100)
 }

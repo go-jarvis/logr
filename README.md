@@ -2,6 +2,41 @@
 
 a golang logger library
 
+## Usage
+
+```go
+
+func TestDefault(t *testing.T) {
+
+	log := Default().SetLevel(DebugLevel)
+	err := errors.New("New_ERROR")
+
+	log = log.With(
+		"kk", "vv",
+		"caller", CallerFile(4, false),
+		"gg",
+	)
+
+	log.Debug("number=%d", 1)
+	log.Info("number=%d", 1)
+	log.Warn(err)
+	log.Error(err)
+
+	ctx := WithLogger(context.Background(), log)
+	subcaller(ctx)
+}
+
+func subcaller(ctx context.Context) {
+	log := FromContext(ctx)
+
+	log = log.Start() // time cost
+	defer log.Stop()
+
+	time.Sleep(532 * time.Millisecond)
+	log.Info("account=%d", 100)
+}
+```
+
 
 This code appears to be a Go (golang) package named `logr`, which defines a `Logger` interface and provides a default implementation of this interface in the form of a `levelLogger` struct. The `levelLogger` struct contains fields for a logger instance, log level, a boolean flag indicating the presence of "valuer" parameters in the logger's context, and a slice of key-value pairs that represent additional context data for the logger.
 
