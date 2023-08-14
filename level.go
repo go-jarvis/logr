@@ -1,6 +1,9 @@
 package logr
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+)
 
 type Level int
 
@@ -9,7 +12,23 @@ const (
 	InfoLevel
 	WarnLevel
 	ErrorLevel
+	FatalLevel
 )
+
+// func (Level).Level() Level
+// func (Level).MarshalJSON() ([]byte, error)
+// func (Level).String() string
+
+func (l Level) Level() Level {
+	return l
+}
+func (l Level) MarshalJSON() ([]byte, error) {
+	return strconv.AppendQuote(nil, l.String()), nil
+}
+
+func (l Level) String() string {
+	return LevelToText(l)
+}
 
 func LevelToText(level Level) string {
 	switch level {

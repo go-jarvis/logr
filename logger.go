@@ -5,8 +5,8 @@ import (
 )
 
 type Logger interface {
-	Debug(msg string, args ...any)
-	Info(msg string, args ...any)
+	Debug(format string, args ...any)
+	Info(format string, args ...any)
 	Warn(err error)
 	Error(err error)
 

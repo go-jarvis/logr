@@ -3,6 +3,7 @@ package logr
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"golang.org/x/exp/slog"
@@ -32,16 +33,16 @@ func (log *levelLogger) Log(level slog.Level, msg string) {
 }
 
 // Debug 打印 debug 日志
-func (log *levelLogger) Debug(msg string, args ...any) {
+func (log *levelLogger) Debug(format string, args ...any) {
 	if log.Enabled(DebugLevel) {
-		log.Log(slog.DebugLevel, fmt.Sprintf(msg, args...))
+		log.Log(slog.DebugLevel, fmt.Sprintf(format, args...))
 	}
 }
 
 // Info 打印 info 日志
-func (log *levelLogger) Info(msg string, args ...any) {
+func (log *levelLogger) Info(format string, args ...any) {
 	if log.Enabled(InfoLevel) {
-		log.Log(slog.InfoLevel, fmt.Sprintf(msg, args...))
+		log.Log(slog.InfoLevel, fmt.Sprintf(format, args...))
 	}
 }
 
@@ -56,6 +57,13 @@ func (log *levelLogger) Warn(err error) {
 func (log *levelLogger) Error(err error) {
 	if log.Enabled(ErrorLevel) {
 		log.Log(slog.ErrorLevel, err.Error())
+	}
+}
+
+func (log *levelLogger) Fatal(err error, code int) {
+	if log.Enabled(FatalLevel) {
+		log.Log(slog.ErrorLevel, err.Error())
+		os.Exit(code)
 	}
 }
 
