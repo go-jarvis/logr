@@ -11,5 +11,5 @@ func DefaultLogger() *slog.Logger {
 }
 
 func DefaultJsonLogger() *slog.Logger {
-	return slog.New(slog.NewJSONHandler(os.Stdout))
+	return slog.New(slog.NewJSONHandler(os.Stdout, nil))
 }

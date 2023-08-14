@@ -25,44 +25,46 @@ type levelLogger struct {
 func (log *levelLogger) Log(level slog.Level, msg string) {
 	kvs := append([]any{}, log.kvs...)
 
+	// todo: 解决 context 的使用
+	ctx := context.Background()
 	if log.hasValuer {
-		kvs = bindValuer(log.slog.Context(), kvs...)
+		kvs = bindValuer(ctx, kvs...)
 	}
 
-	log.slog.With(kvs...).LogDepth(0, level, msg)
+	log.slog.With(kvs...).Log(ctx, level, msg)
 }
 
 // Debug 打印 debug 日志
 func (log *levelLogger) Debug(format string, args ...any) {
 	if log.Enabled(DebugLevel) {
-		log.Log(slog.DebugLevel, fmt.Sprintf(format, args...))
+		log.Log(slog.LevelDebug, fmt.Sprintf(format, args...))
 	}
 }
 
 // Info 打印 info 日志
 func (log *levelLogger) Info(format string, args ...any) {
 	if log.Enabled(InfoLevel) {
-		log.Log(slog.InfoLevel, fmt.Sprintf(format, args...))
+		log.Log(slog.LevelInfo, fmt.Sprintf(format, args...))
 	}
 }
 
 // Warn 打印 Warn 日志
 func (log *levelLogger) Warn(err error) {
 	if log.Enabled(WarnLevel) {
-		log.Log(slog.WarnLevel, err.Error())
+		log.Log(slog.LevelWarn, err.Error())
 	}
 }
 
 // Error 打印 Error 日志
 func (log *levelLogger) Error(err error) {
 	if log.Enabled(ErrorLevel) {
-		log.Log(slog.ErrorLevel, err.Error())
+		log.Log(slog.LevelError, err.Error())
 	}
 }
 
 func (log *levelLogger) Fatal(err error, code int) {
 	if log.Enabled(FatalLevel) {
-		log.Log(slog.ErrorLevel, err.Error())
+		log.Log(slog.LevelError, err.Error())
 		os.Exit(code)
 	}
 }
@@ -122,17 +124,17 @@ func (log *levelLogger) SetLevel(level Level) Logger {
 	}
 }
 
-// WithContext 将 context 保存到 Logger 中
-func (log *levelLogger) WithContext(ctx context.Context) Logger {
-	logc := log.copy()
-	logc.slog = log.slog.WithContext(ctx)
-	return logc
-}
+// // WithContext 将 context 保存到 Logger 中
+// func (log *levelLogger) WithContext(ctx context.Context) Logger {
+// 	logc := log.copy()
+// 	logc.slog = log.slog.WithContext(ctx)
+// 	return logc
+// }
 
-// Context 从 Logger 中提取 context
-func (log *levelLogger) Context() context.Context {
-	return log.slog.Context()
-}
+// // Context 从 Logger 中提取 context
+// func (log *levelLogger) Context() context.Context {
+// 	return log.slog.Context()
+// }
 
 // copy 复制一个新的 *levelLogger 对象
 func (log *levelLogger) copy() *levelLogger {

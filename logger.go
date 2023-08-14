@@ -21,8 +21,8 @@ type Logger interface {
 	Enabled(level Level) bool
 	SetLevel(level Level) Logger
 
-	WithContext(context.Context) Logger
-	Context() context.Context
+	// WithContext(context.Context) Logger
+	// Context() context.Context
 }
 
 type LogrKey int

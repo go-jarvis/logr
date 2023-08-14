@@ -5,11 +5,22 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	"github.com/go-jarvis/logr/slogx"
 )
 
+func newLogger() Logger {
+	c := Config{
+		Level:   "debug",
+		SLogger: slogx.DefaultJsonLogger(),
+	}
+	return New(c)
+
+}
 func TestDefault(t *testing.T) {
 
-	log := Default().SetLevel(DebugLevel)
+	// log := Default().SetLevel(DebugLevel)
+	log := newLogger()
 	err := errors.New("New_ERROR")
 
 	log = log.With(

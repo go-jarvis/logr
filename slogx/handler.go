@@ -1,6 +1,10 @@
 package slogx
 
-import "golang.org/x/exp/slog"
+import (
+	"context"
+
+	"golang.org/x/exp/slog"
+)
 
 var _ slog.Handler = &slogHandler{}
 
@@ -18,12 +22,12 @@ func NewHandler(handler slog.Handler) slog.Handler {
 	}
 }
 
-func (h *slogHandler) Enabled(level slog.Level) bool {
+func (h *slogHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	return true
 }
 
-func (h *slogHandler) Handle(r slog.Record) error {
-	return h.h.Handle(r)
+func (h *slogHandler) Handle(ctx context.Context, r slog.Record) error {
+	return h.h.Handle(ctx, r)
 }
 
 func (h *slogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
