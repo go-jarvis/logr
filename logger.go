@@ -7,37 +7,27 @@ import (
 type Logger interface {
 	Debug(format string, args ...any)
 	Info(format string, args ...any)
-	Warn(err error)
-	Error(err error)
+	Warn(format string, args ...any)
+	Error(format string, args ...any)
+	Fatal(format string, args ...any)
 
-	With(args ...any) Logger
-
-	// 启动计时器
-	// log = log.Start()
-	// defer log.Stop()
-	Start() Logger
-	Stop()
-
-	Enabled(level Level) bool
-	SetLevel(level Level) Logger
-
-	// WithContext(context.Context) Logger
-	// Context() context.Context
+	// With("key1", "val1", "key2", "val2")
+	With(kvs ...any) Logger
 }
 
-type LogrKey int
+type LoggerKey int
 
-const defaultLogrKey LogrKey = 0
+const defaultLoggerKey LoggerKey = 0
 
 func WithLogger(ctx context.Context, log Logger) context.Context {
-	return context.WithValue(ctx, defaultLogrKey, log)
+	return context.WithValue(ctx, defaultLoggerKey, log)
 }
 
 func FromContext(ctx context.Context) Logger {
-	val := ctx.Value(defaultLogrKey)
+	val := ctx.Value(defaultLoggerKey)
 	if log, ok := val.(Logger); ok {
 		return log
 	}
 
-	return Default()
+	return nil
 }

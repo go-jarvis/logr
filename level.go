@@ -15,10 +15,6 @@ const (
 	FatalLevel
 )
 
-// func (Level).Level() Level
-// func (Level).MarshalJSON() ([]byte, error)
-// func (Level).String() string
-
 func (l Level) Level() Level {
 	return l
 }

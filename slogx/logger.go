@@ -7,9 +7,18 @@ import (
 )
 
 func DefaultLogger() *slog.Logger {
-	return slog.New(DefaultHandler())
+	return slog.New(
+		newHandler(
+			slog.Default().Handler(),
+		),
+	)
+
 }
 
-func DefaultJsonLogger() *slog.Logger {
-	return slog.New(slog.NewJSONHandler(os.Stdout, nil))
+func DefaultJSONLogger() *slog.Logger {
+	return slog.New(
+		newHandler(
+			slog.NewJSONHandler(os.Stdout, nil),
+		),
+	)
 }
